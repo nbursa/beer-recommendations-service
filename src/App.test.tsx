@@ -49,9 +49,7 @@ describe("App component", () => {
 
         // Search for the price using `getAllByText`
         const priceElements = screen.getAllByText((_, element) =>
-          element?.textContent
-            ? element.textContent.includes(beer.price)
-            : false
+          element?.textContent ? element.textContent.includes(beer.price) : false
         );
         expect(priceElements.length).toBeGreaterThan(0);
 
