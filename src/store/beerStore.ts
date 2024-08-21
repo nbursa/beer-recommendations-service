@@ -11,21 +11,80 @@ interface Beer {
   image: string;
   price: string;
   rating: Rating;
+  style?: string;
+  details?: string;
+  brand?: string;
 }
 
 interface BeerState {
   beers: Beer[];
+  filteredBeers: Beer[];
+  filters: {
+    name: string;
+    minPrice: string;
+    maxPrice: string;
+    minRating: string;
+    maxRating: string;
+  };
   fetchBeers: () => void;
+  getBeerById: (id: number) => Beer | undefined;
+  setFilters: (filters: Partial<BeerState["filters"]>) => void;
+  applyFilters: () => void;
 }
 
 export const useBeerStore = create<BeerState>((set, get) => ({
   beers: [],
+  filteredBeers: [],
+  filters: {
+    name: "",
+    minPrice: "",
+    maxPrice: "",
+    minRating: "",
+    maxRating: "",
+  },
   fetchBeers: async () => {
     if (get().beers.length === 0) {
-      // Check if beers are already in the store
       const response = await fetch("https://api.sampleapis.com/beers/ale");
       const data = await response.json();
       set({ beers: data });
+      get().applyFilters();
     }
+  },
+  getBeerById: (id: number) => {
+    return get().beers.find((beer) => beer.id === id);
+  },
+  setFilters: (filters) => {
+    set((state) => ({
+      filters: { ...state.filters, ...filters },
+    }));
+    get().applyFilters();
+  },
+  applyFilters: () => {
+    const { beers, filters } = get();
+    const filtered = beers.filter((beer) => {
+      const matchName = filters.name
+        ? beer.name
+            ?.toLocaleLowerCase()
+            .includes(filters.name.toLocaleLowerCase())
+        : true;
+      const matchPrice =
+        (filters.minPrice
+          ? parseFloat(beer.price.replace("$", "")) >=
+            parseFloat(filters.minPrice)
+          : true) &&
+        (filters.maxPrice
+          ? parseFloat(beer.price.replace("$", "")) <=
+            parseFloat(filters.maxPrice)
+          : true);
+      const matchRating =
+        (filters.minRating
+          ? beer.rating?.average >= parseFloat(filters.minRating)
+          : true) &&
+        (filters.maxRating
+          ? beer.rating?.average <= parseFloat(filters.maxRating)
+          : true);
+      return matchName && matchPrice && matchRating;
+    });
+    set({ filteredBeers: filtered });
   },
 }));
