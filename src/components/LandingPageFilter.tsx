@@ -81,6 +81,31 @@ function LandingPageFilter() {
               />
             </div>
           </div>
+          <div>
+            <label className="block mb-2">Sort By & Order</label>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                name="sortBy"
+                value={filters.sortBy}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 transition duration-300"
+              >
+                <option value="">None</option>
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+                <option value="rating">Rating</option>
+              </select>
+              <select
+                name="sortOrder"
+                value={filters.sortOrder}
+                onChange={handleInputChange}
+                className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-500 transition duration-300"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>

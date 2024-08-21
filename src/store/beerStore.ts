@@ -25,6 +25,8 @@ interface BeerState {
     maxPrice: string;
     minRating: string;
     maxRating: string;
+    sortBy: string;
+    sortOrder: "asc" | "desc";
   };
   fetchBeers: () => void;
   getBeerById: (id: number) => Beer | undefined;
@@ -41,6 +43,8 @@ export const useBeerStore = create<BeerState>((set, get) => ({
     maxPrice: "",
     minRating: "",
     maxRating: "",
+    sortBy: "",
+    sortOrder: "asc",
   },
   fetchBeers: async () => {
     if (get().beers.length === 0) {
@@ -85,6 +89,24 @@ export const useBeerStore = create<BeerState>((set, get) => ({
           : true);
       return matchName && matchPrice && matchRating;
     });
-    set({ filteredBeers: filtered });
+
+    // Sort the filtered beers based on the selected sort option and order
+    const sorted = [...filtered].sort((a, b) => {
+      const orderMultiplier = filters.sortOrder === "asc" ? 1 : -1;
+      if (filters.sortBy === "name") {
+        return orderMultiplier * a.name.localeCompare(b.name);
+      } else if (filters.sortBy === "price") {
+        return (
+          orderMultiplier *
+          (parseFloat(a.price.replace("$", "")) -
+            parseFloat(b.price.replace("$", "")))
+        );
+      } else if (filters.sortBy === "rating") {
+        return orderMultiplier * (b.rating.average - a.rating.average);
+      }
+      return 0;
+    });
+
+    set({ filteredBeers: sorted });
   },
 }));
