@@ -13,7 +13,7 @@ function LandingPageFilter() {
   };
 
   return (
-    <div className="p-4 w-full md:w-2/3 lg:w-1/2 mx-auto">
+    <div className="w-full md:w-2/3 lg:w-1/2 mx-auto">
       <div
         className="cursor-pointer text-center p-2 bg-gray-800 text-white rounded-md mb-4 transition-transform duration-300 hover:bg-gray-700"
         onClick={() => setIsExpanded(!isExpanded)}

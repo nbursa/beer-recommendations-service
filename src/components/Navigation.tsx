@@ -4,7 +4,7 @@ function Navigation() {
   const location = useLocation();
 
   const getLinkClasses = (path: string) =>
-    `p-2 text-white ${location.pathname === path ? "text-bold" : ""}`;
+    `p-2  ${location.pathname === path ? "font-bold" : ""}`;
 
   return (
     <nav className="p-4">
