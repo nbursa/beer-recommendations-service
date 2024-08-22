@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useBeerStore } from "../store/beerStore";
 import { Bar } from "react-chartjs-2";
 import {
@@ -11,19 +11,16 @@ import {
   Legend,
 } from "chart.js";
 import { Beer } from "../types/beer";
+import BeerFilter from "../components/BeerFilter";
+import BeerForm from "../components/BeerForm";
 
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function ManagementPage() {
-  const { beers, fetchBeers, addBeer, updateBeer, deleteBeer } = useBeerStore();
-  const [newBeer, setNewBeer] = useState<Partial<Beer>>({
-    id: null,
-    name: "",
-    price: "",
-    rating: { average: 0, reviews: 0 },
-    image: "",
-  });
+  const { beers, fetchBeers, addBeer, updateBeer, deleteBeer, filteredBeers } =
+    useBeerStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [editingBeer, setEditingBeer] = useState<Partial<Beer> | undefined>();
 
   useEffect(() => {
     if (!beers.length) {
@@ -49,152 +46,114 @@ function ManagementPage() {
     ],
   };
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setNewBeer((prev) => {
-        if (name.includes("rating")) {
-          const [, key] = name.split(".");
-          return {
-            ...prev,
-            rating: {
-              ...prev.rating,
-              [key]: parseFloat(value) || 0,
-            },
-          } as Partial<Beer>;
-        } else {
-          return { ...prev, [name]: value };
-        }
-      });
-    },
-    []
-  );
-
-  const handleSubmit = useCallback(() => {
-    if (isEditing) {
-      updateBeer(newBeer as Beer);
-    } else {
-      addBeer(newBeer as Beer);
-    }
-    setNewBeer({
-      id: null,
-      name: "",
-      price: "",
-      rating: { average: 0, reviews: 0 },
-      image: "",
-    });
-    setIsEditing(false);
-  }, [isEditing, newBeer, addBeer, updateBeer]);
-
-  const handleEdit = useCallback((beer: Beer) => {
-    setIsEditing(true);
-    setNewBeer({
-      ...beer,
-      rating: {
-        average: beer.rating?.average || 0,
-        reviews: beer.rating?.reviews || 0,
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
       },
-    });
-  }, []);
-
-  const handleDelete = useCallback(
-    (id: number | null) => {
-      if (id) deleteBeer(id);
     },
-    [deleteBeer]
-  );
+  };
+
+  const handleFormSubmit = (beer: Partial<Beer>) => {
+    if (isEditing) {
+      updateBeer(beer as Beer);
+    } else {
+      addBeer(beer as Beer);
+    }
+    setIsEditing(false);
+    setEditingBeer(undefined);
+  };
+
+  const handleEdit = (beer: Beer) => {
+    setIsEditing(true);
+    setEditingBeer(beer);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditingBeer(undefined);
+  };
+
+  const handleDelete = (id: number | null) => {
+    if (id) deleteBeer(id);
+  };
 
   if (!beers.length) return <div>Loading...</div>;
 
   return (
     <div className="p-4 w-screen h-screen overflow-y-auto">
       <h1 className="text-4xl font-bold text-center">Management View</h1>
-      <div className="max-w-screen-md mx-auto mt-4">
-        <Bar data={chartData} />
+
+      <div className="w-full max-w-screen-md mx-auto mt-4">
+        <Bar
+          data={chartData}
+          options={chartOptions}
+          className="w-full h-full"
+        />
       </div>
+
       <div className="max-w-screen-md mx-auto mt-8">
-        <h2 className="text-2xl font-bold mb-4">
-          {isEditing ? "Edit" : "Add"} Beer
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <input
-            type="text"
-            name="name"
-            value={newBeer.name || ""}
-            onChange={handleInputChange}
-            placeholder="Name"
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="text"
-            name="price"
-            value={newBeer.price || ""}
-            onChange={handleInputChange}
-            placeholder="Price"
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="number"
-            name="rating.average"
-            value={newBeer.rating?.average || 0}
-            onChange={handleInputChange}
-            placeholder="Rating"
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="number"
-            name="rating.reviews"
-            value={newBeer.rating?.reviews || 0}
-            onChange={handleInputChange}
-            placeholder="Reviews"
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="text"
-            name="image"
-            value={newBeer.image || ""}
-            onChange={handleInputChange}
-            placeholder="Image URL"
-            className="border p-2 rounded w-full"
-          />
-        </div>
-        <button
-          onClick={handleSubmit}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          {isEditing ? "Update Beer" : "Add Beer"}
-        </button>
-      </div>
-      <div className="max-w-screen-md mx-auto mt-8">
-        <h2 className="text-2xl font-bold mb-4">Manage Beers</h2>
-        <ul className="space-y-2">
-          {beers.map((beer) => (
-            <li
-              key={beer.id}
-              className="p-4 border rounded flex justify-between items-center"
-            >
-              <div>
-                <h3 className="font-bold">{beer.name}</h3>
-                <p>Price: {beer.price}</p>
-                <p>Rating: {beer.rating.average.toFixed(2)}</p>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleEdit(beer)}
-                  className="bg-yellow-500 text-white p-2 rounded"
+        <h2 className="text-3xl text-center font-bold mb-4">Manage Beers</h2>
+
+        <BeerForm
+          onSubmit={handleFormSubmit}
+          initialData={editingBeer}
+          isEditing={isEditing}
+          onCancel={handleCancel}
+        />
+
+        {!isEditing && (
+          <>
+            <BeerFilter />
+            <div className="grid gap-4 xl:gap-6 max-w-screen-xl mt-4 mx-auto">
+              {filteredBeers.map((beer) => (
+                <div
+                  key={beer.id}
+                  className="p-4 flex flex-col sm:flex-row gap-4 border rounded transform transition duration-500 hover:scale-105"
                 >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(beer.id)}
-                  className="bg-red-500 text-white p-2 rounded"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <img
+                    src={beer.image}
+                    alt={beer.name}
+                    className="w-1/2 h-40 object-contain rounded"
+                  />
+                  <div className="w-1/2 flex flex-col justify-between">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-bold">{beer.name}</h2>
+                      <div className="text-sm">
+                        Price: <span className="text-xl">{beer.price}</span>
+                      </div>
+                      <div className="text-sm">
+                        Rating:{" "}
+                        <span className="text-lg">
+                          {beer.rating.average.toFixed(2)}{" "}
+                        </span>
+                        <div className="text-xs italic">
+                          ({beer.rating.reviews} reviews)
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => handleEdit(beer)}
+                        className="w-1/2 bg-yellow-500 text-white p-2 rounded"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(beer.id)}
+                        className="w-1/2 bg-red-500 text-white p-2 rounded"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

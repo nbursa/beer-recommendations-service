@@ -1,21 +1,22 @@
 import { useBeerStore } from "../store/beerStore";
 import { useState } from "react";
 
-function LandingPageFilter() {
-  const { filters, setFilters } = useBeerStore();
-  const [isExpanded, setIsExpanded] = useState(true);
+function BeerFilter() {
+  const { filters, setFilters, applyFilters } = useBeerStore();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFilters({ [name]: value });
+    applyFilters();
   };
 
   return (
-    <div className="w-full md:w-2/3 lg:w-1/2 mx-auto">
+    <div className="w-full mx-auto">
       <div
-        className="cursor-pointer text-center p-2 bg-gray-800 text-white rounded-md mb-4 transition-transform duration-300 hover:bg-gray-700"
+        className="cursor-pointer text-center p-2 bg-gray-800 text-white hover:bg-gray-700 rounded-md mb-4 transition-transform duration-300"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <h2 className="text-xl font-bold">
@@ -112,4 +113,4 @@ function LandingPageFilter() {
   );
 }
 
-export default LandingPageFilter;
+export default BeerFilter;

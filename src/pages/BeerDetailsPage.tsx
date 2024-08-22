@@ -38,7 +38,7 @@ function BeerDetailsPage() {
             </div>
           </div>
           <div className="flex gap-4">
-            <button className="w-full border bg-yellow-500 text-black hover:bg-yellow-400 hover:border-none hover:scale-105 transition duration-150 ease-in-out p-2 rounded">
+            <button className="w-full border bg-gray-800 text-white hover:bg-gray-700 transition duration-150 ease-in-out p-2 rounded">
               Buy
             </button>
           </div>
