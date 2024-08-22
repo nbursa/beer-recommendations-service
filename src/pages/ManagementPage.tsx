@@ -107,7 +107,7 @@ function ManagementPage() {
         {!isEditing && (
           <>
             <BeerFilter />
-            <div className="grid gap-4 xl:gap-6 max-w-screen-xl mt-4 mx-auto">
+            <div className="grid gap-4 lg:grid-cols-2 xl:gap-6 max-w-screen-xl mt-4 mx-auto">
               {filteredBeers.map((beer) => (
                 <div
                   key={beer.id}
@@ -116,9 +116,9 @@ function ManagementPage() {
                   <img
                     src={beer.image}
                     alt={beer.name}
-                    className="w-1/2 h-40 object-contain rounded"
+                    className="w-full sm:w-1/2 h-40 object-contain rounded"
                   />
-                  <div className="w-1/2 flex flex-col justify-between">
+                  <div className="w-full sm:w-1/2 flex flex-col justify-between">
                     <div className="mb-4">
                       <h2 className="text-xl font-bold">{beer.name}</h2>
                       <div className="text-sm">
