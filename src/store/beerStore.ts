@@ -1,38 +1,5 @@
 import { create } from "zustand";
-
-interface Rating {
-  average: number;
-  reviews: number;
-}
-
-interface Beer {
-  id: number;
-  name: string;
-  image: string;
-  price: string;
-  rating: Rating;
-  style?: string;
-  details?: string;
-  brand?: string;
-}
-
-interface BeerState {
-  beers: Beer[];
-  filteredBeers: Beer[];
-  filters: {
-    name: string;
-    minPrice: string;
-    maxPrice: string;
-    minRating: string;
-    maxRating: string;
-    sortBy: string;
-    sortOrder: "asc" | "desc";
-  };
-  fetchBeers: () => void;
-  getBeerById: (id: number) => Beer | undefined;
-  setFilters: (filters: Partial<BeerState["filters"]>) => void;
-  applyFilters: () => void;
-}
+import { BeerState } from "../types/beer";
 
 export const useBeerStore = create<BeerState>((set, get) => ({
   beers: [],
@@ -108,5 +75,25 @@ export const useBeerStore = create<BeerState>((set, get) => ({
     });
 
     set({ filteredBeers: sorted });
+  },
+  addBeer: (newBeer) => {
+    set((state) => ({
+      beers: [...state.beers, newBeer],
+    }));
+    get().applyFilters();
+  },
+  updateBeer: (updatedBeer) => {
+    set((state) => ({
+      beers: state.beers.map((beer) =>
+        beer.id === updatedBeer.id ? updatedBeer : beer
+      ),
+    }));
+    get().applyFilters();
+  },
+  deleteBeer: (id) => {
+    set((state) => ({
+      beers: state.beers.filter((beer) => beer.id !== id),
+    }));
+    get().applyFilters();
   },
 }));
