@@ -1,4 +1,4 @@
-# Beer Recommendations Service
+# Beer Recommendations Service Concept
 
 This repository contains the frontend implementation for the Craft Beer Emporium's Beer Recommendations Service.
 
